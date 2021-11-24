@@ -33,7 +33,8 @@ export default function Home() {
 
   const fetchExample = async () => {
     const data  =await fetch(`https://projekt.oscarspalk.com/example.json`)
-    await sessionStorage.setItem('mapData', result);
+    const stringy = await data.text();
+    await sessionStorage.setItem('mapData', stringy);
     router.push('/submitted')
   }
   
@@ -78,7 +79,7 @@ export default function Home() {
         <Image  width="480px" height="246px" src="https://projekt.oscarspalk.com/projektopgave.png" alt="Screenshot" />
       </Image.Browser>
       <Text mt={1} h3>Upload din lokationsfil nedenfor eller brug eksempelfilen</Text>
-      <Button mt={1} type="secondary">Eksempelfil</Button>
+      <Button onClick={fetchExample} type="secondary">Eksempelfil</Button>
       <Button mt={1} onClick={() => setVisible(true)}>Guide</Button>
       <br />
       <input onChange={(e) => handleUpload(e.target)} type="file" />
