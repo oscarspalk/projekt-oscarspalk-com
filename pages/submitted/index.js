@@ -141,6 +141,9 @@ export default function Home() {
 
   return (
     <>
+    <Head>
+        <title>Dashboard</title>
+    </Head>
       <Page>
         <div>
           <Text h1>{months[month] + " " +  year}</Text>
