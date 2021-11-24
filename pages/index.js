@@ -1,6 +1,6 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
-import { Text, Image, Modal, Button, Link, Tree } from "@geist-ui/react";
+import { Text, Image, Modal, Button, Link, Tree, Select } from "@geist-ui/react";
 import { useEffect, useState } from "react";
 import Photoshot from '../public/projektopgave.png'
 import { useRouter } from "next/router";
@@ -30,6 +30,13 @@ export default function Home() {
   const closeHandler = () => {
     setVisible(false)
   }
+
+  const fetchExample = async () => {
+    const data  =await fetch(`https://projekt.oscarspalk.com/example.json`)
+    await sessionStorage.setItem('mapData', result);
+    router.push('/submitted')
+  }
+  
   return (
     <div className={styles.container}>
       <Modal visible={visible} onClose={closeHandler}>
@@ -70,10 +77,12 @@ export default function Home() {
       <Image.Browser url="https://projekt.oscarspalk.com" invert>
         <Image  width="480px" height="246px" src="https://projekt.oscarspalk.com/projektopgave.png" alt="Screenshot" />
       </Image.Browser>
-      <Text mt={2} h3>Upload din lokationsfil nedenfor</Text>
-      <Button onClick={() => setVisible(true)}>Guide</Button>
+      <Text mt={1} h3>Upload din lokationsfil nedenfor eller brug eksempelfilen</Text>
+      <Button mt={1} type="secondary">Eksempelfil</Button>
+      <Button mt={1} onClick={() => setVisible(true)}>Guide</Button>
       <br />
       <input onChange={(e) => handleUpload(e.target)} type="file" />
+      
     </div>
   );
 }
