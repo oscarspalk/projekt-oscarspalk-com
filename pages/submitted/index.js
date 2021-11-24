@@ -12,6 +12,7 @@ import {
   Slider,
   Modal,
   Table,
+  Toggle
 } from "@geist-ui/react";
 import MapPin from "@geist-ui/react-icons/mapPin";
 import { useEffect, useCallback, useState } from "react";
@@ -33,7 +34,6 @@ export default function Home() {
     { kode: "FLYING", dk: "Flyver" },
     { kode: "IN_VEHICLE", dk: "Kører bil" },
   ];
-  const api_key = "AIzaSyDSOgEj6sNbkji0mETdO4NZTmpL-eB67rY";
   const months = [
     "Januar",
     "Februar",
@@ -61,6 +61,9 @@ export default function Home() {
   const [home, setHome] = useState("");
   const [places, setPlaces] = useState([]);
   const [year, setYear] = useState(0);
+  const [showActivities, setShowActivities] = useState(true);
+  const [showPlaces, setShowPlaces] = useState(true);
+
   useEffect(() => {
     loadStorage();
   }, []);
@@ -104,7 +107,10 @@ export default function Home() {
       for (var i = 0; i < activityAr.length; i++) {
         if (activityAr[i].activitySegment != undefined) {
           var aktivitet = activityAr[i].activitySegment;
-          tempKM = tempKM + aktivitet.distance;
+          if(aktivitet.distance != undefined){
+            tempKM = tempKM + aktivitet.distance;
+          }
+  
 
           var startmilli = parseInt(aktivitet.duration.startTimestampMs);
           var endmilli = parseInt(aktivitet.duration.endTimestampMs);
@@ -119,7 +125,6 @@ export default function Home() {
         if (!result[arrOfPlaces[i]]) result[arrOfPlaces[i]] = 0;
         ++result[arrOfPlaces[i]];
       }
-      
       setPlaces(result)
       setKmTraveled(parseInt(tempKM / 1000));
       setPlacesVisited(placeVisited);
@@ -138,6 +143,7 @@ export default function Home() {
     }
     setHome(finalHome);
   }, [places]);
+
 
   return (
     <>
@@ -163,12 +169,18 @@ export default function Home() {
             <Grid>
               <Description title="Dit Hjem" content={home} />
             </Grid>
+            <Grid>
+              <Description title="Vis Aktiviteter" content={<Toggle onChange={(e) => setShowActivities(e.target.checked)} initialChecked />} />
+            </Grid>
+            <Grid>
+              <Description title="Vis Steder" content={<Toggle initialChecked onChange={(e) => setShowPlaces(e.target.checked)} />} />
+            </Grid>
           </Grid.Container>
         </div>
         <Grid.Container mt={2} wrap="wrap" justify="center" gap={3}>
-          {activityAr != [] && activityAr != undefined
+          {activityAr != [] && activityAr != undefined && (showActivities || showPlaces)
             ? activityAr.map((activity, index) => {
-                if (activity.activitySegment != undefined) {
+                if (activity.activitySegment != undefined && showActivities) {
                   var segment = activity.activitySegment;
                   var type = activities.find(
                     (activity) => activity.kode == segment.activityType
@@ -224,7 +236,7 @@ export default function Home() {
                       </Card>
                     </Grid>
                   );
-                } else {
+                } else if(showPlaces && activity.placeVisit != undefined) {
                   var place = activity.placeVisit;
                   var startdate = new Date(
                     parseInt(place.duration.startTimestampMs)
@@ -277,14 +289,22 @@ export default function Home() {
                                 content={startdate.toLocaleDateString()}
                               />
                             </Grid>
+                            {place.location.semanticType != undefined ?<Grid>
+                               <Description
+                                title="Type"
+                                content={place.location.semanticType === "TYPE_HOME" ? "Hjem": place.location.semanticType}
+                              />
+                            </Grid>: null}
                           </Grid.Container>
                         </Card.Content>
                       </Card>
                     </Grid>
                   );
                 }
+                
               })
-            : null}
+              
+            : <Text h3>Slå et filter fra for at vise nogle aktiviteter.</Text>}
         </Grid.Container>
       </Page>
     </>
