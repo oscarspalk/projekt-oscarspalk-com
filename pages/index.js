@@ -2,7 +2,6 @@ import Head from "next/head";
 import styles from "../styles/Home.module.css";
 import { Text, Image, Modal, Button, Link, Tree, Select } from "@geist-ui/react";
 import { useEffect, useState } from "react";
-import Photoshot from '../public/projektopgave.png'
 import { useRouter } from "next/router";
 export default function Home() {
   const router = useRouter();

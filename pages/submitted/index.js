@@ -14,27 +14,14 @@ import {
   Modal,
   Table,
   Toggle,
+  Divider,
 } from "@geist-ui/react";
 import MapPin from "@geist-ui/react-icons/mapPin";
 import { useEffect, useCallback, useState } from "react";
+import ActivityCard from "../../components/ActivityCard";
+import PlaceCard from "../../components/PlaceCard";
 export default function Home() {
-  const activities = [
-    { kode: "CYCLING", dk: "Cyklende" },
-    { kode: "IN_PASSENGER_VEHICLE", dk: "Passager i bil" },
-    { kode: "MOTORCYCLING", dk: "Kører på motorcykel" },
-    { kode: "WALKING", dk: "Gående" },
-    { kode: "RUNNING", dk: "Løbende" },
-    { kode: "IN_BUS", dk: "Kører i bus" },
-    { kode: "STILL", dk: "Står stille" },
-    { kode: "IN_FERRY", dk: "Sejler med en færge" },
-    { kode: "IN_TRAIN", dk: "Kører med tog" },
-    { kode: "SKIING", dk: "Står på ski" },
-    { kode: "IN_SUBWAY", dk: "Kører med metro" },
-    { kode: "IN_TRAM", dk: "Kører med sporvogn" },
-    { kode: "SAILING", dk: "Sejler" },
-    { kode: "FLYING", dk: "Flyver" },
-    { kode: "IN_VEHICLE", dk: "Kører bil" },
-  ];
+  
   const months = [
     "Januar",
     "Februar",
@@ -149,10 +136,7 @@ export default function Home() {
     setAvaibleDates(availDates);
   }, [lowestDate, highestDate]);
 
-
-  const list = [
-    143,41,42,424,1241,41241
-  ];
+  const list = [143, 41, 42, 424, 1241, 41241];
   return (
     <>
       <Head>
@@ -204,11 +188,18 @@ export default function Home() {
                 <Description
                   title="Vælg Dato"
                   content={
-                    <Select initialValue="0" onChange={(e) => setSelectedDate(parseInt(e))}>
+                    <Select
+                      initialValue="0"
+                      onChange={(e) => setSelectedDate(parseInt(e))}
+                    >
                       <Select.Option value="0">Alle</Select.Option>
+                      <Divider />
                       {avaibleDates.map((number, index) => {
                         return (
-                          <Select.Option key={index + 1} value={number.toString()}>
+                          <Select.Option
+                            key={index + 1}
+                            value={number.toString()}
+                          >
                             {number.toString()}
                           </Select.Option>
                         );
@@ -226,149 +217,29 @@ export default function Home() {
           (showActivities || showPlaces) ? (
             activityAr.map((activity, index) => {
               var dateSelector;
-              if(activity.activitySegment != undefined){
-                dateSelector =new Date(
+              if (activity.activitySegment != undefined) {
+                dateSelector = new Date(
                   parseInt(activity.activitySegment.duration.startTimestampMs)
                 );
-              }
-              else{
-                dateSelector =new Date(
+              } else {
+                dateSelector = new Date(
                   parseInt(activity.placeVisit.duration.startTimestampMs)
                 );
               }
-              if(dateSelector.getDate() === selectedDate || selectedDate === 0){
+              if (
+                dateSelector.getDate() === selectedDate ||
+                selectedDate === 0
+              ) {
                 if (activity.activitySegment != undefined && showActivities) {
                   var segment = activity.activitySegment;
-                  var type = activities.find(
-                    (activity) => activity.kode == segment.activityType
-                  );
-                  var startdate = new Date(
-                    parseInt(segment.duration.startTimestampMs)
-                  );
-                  var starttid = startdate.toLocaleTimeString();
-  
-                  var sluttid = new Date(
-                    parseInt(segment.duration.endTimestampMs)
-                  ).toLocaleTimeString();
-                  return (
-                    <Grid
-                      style={{ minWidth: "180px" }}
-                      key={index}
-                      xs={6}
-                      sm={6}
-                      md={6}
-                      lg={6}
-                    >
-                      <Card width="100%">
-                        <Grid.Container direction="row" gap={2}>
-                          <Grid>
-                            <Description
-                              title="Aktivitet"
-                              content={
-                                type === undefined
-                                  ? segment.activityType
-                                  : type.dk
-                              }
-                            />
-                          </Grid>
-                          <Grid>
-                            <Description
-                              title="Distance"
-                              content={segment.distance + "m"}
-                            />
-                          </Grid>
-  
-                          <Grid>
-                            <Description
-                              title="Starttidspunkt"
-                              content={starttid}
-                            />
-                          </Grid>
-                          <Grid>
-                            <Description
-                              title="Sluttidspunkt"
-                              content={sluttid}
-                            />
-                          </Grid>
-                          <Grid>
-                            <Description
-                              title="Dato"
-                              content={startdate.toLocaleDateString()}
-                            />
-                          </Grid>
-                        </Grid.Container>
-                      </Card>
-                    </Grid>
-                  );
+                  
+                  return <ActivityCard  activity={segment}/>;
                 } else if (showPlaces && activity.placeVisit != undefined) {
                   var place = activity.placeVisit;
-                  var startdate = new Date(
-                    parseInt(place.duration.startTimestampMs)
-                  );
-                  var starttid = startdate.toLocaleTimeString();
-                  var sluttid = new Date(
-                    parseInt(place.duration.endTimestampMs)
-                  ).toLocaleTimeString();
+                  
                   return (
-                    <Grid style={{ minWidth: "180px" }} key={index} xs={6}>
-                      <Card width="100%">
-                        <Card.Content>
-                          <Grid.Container direction="row" gap={2}>
-                            <Grid>
-                              <Description
-                                title="Sted"
-                                content={place.location.name}
-                              />
-                            </Grid>
-                            <Grid>
-                              <Description
-                                title="Addresse"
-                                content={place.location.address}
-                              />
-                            </Grid>
-                            <Grid>
-                              <Description
-                                title="Sikkerhed"
-                                content={
-                                  parseInt(place.location.locationConfidence) +
-                                  "%"
-                                }
-                              />
-                            </Grid>
-                            <Grid>
-                              <Description
-                                title="Starttidspunkt"
-                                content={starttid}
-                              />
-                            </Grid>
-                            <Grid>
-                              <Description
-                                title="Sluttidspunkt"
-                                content={sluttid}
-                              />
-                            </Grid>
-                            <Grid>
-                              <Description
-                                title="Dato"
-                                content={startdate.toLocaleDateString()}
-                              />
-                            </Grid>
-                            {place.location.semanticType != undefined ? (
-                              <Grid>
-                                <Description
-                                  title="Type"
-                                  content={
-                                    place.location.semanticType === "TYPE_HOME"
-                                      ? "Hjem"
-                                      : place.location.semanticType
-                                  }
-                                />
-                              </Grid>
-                            ) : null}
-                          </Grid.Container>
-                        </Card.Content>
-                      </Card>
-                    </Grid>
+                  
+                   <PlaceCard place={place} />
                   );
                 }
               }
