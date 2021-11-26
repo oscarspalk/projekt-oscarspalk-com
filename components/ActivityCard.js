@@ -18,7 +18,7 @@ const activities = [
   { kode: "IN_VEHICLE", dk: "Kører bil" },
 ];
 const ActivityCard = (props) => {
-  const segment = props.activity;
+  var segment = props.activity;
   var type = activities.find(
     (activity) => activity.kode == segment.activityType
   );

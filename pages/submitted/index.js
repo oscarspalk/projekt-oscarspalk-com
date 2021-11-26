@@ -4,16 +4,11 @@ import Image from "next/image";
 import {
   Text,
   Grid,
-  Card,
-  Button,
   Description,
   Page,
-  Spacer,
   Select,
-  Slider,
-  Modal,
-  Table,
   Toggle,
+  Loading,
   Divider,
 } from "@geist-ui/react";
 import MapPin from "@geist-ui/react-icons/mapPin";
@@ -21,7 +16,6 @@ import { useEffect, useCallback, useState } from "react";
 import ActivityCard from "../../components/ActivityCard";
 import PlaceCard from "../../components/PlaceCard";
 export default function Home() {
-  
   const months = [
     "Januar",
     "Februar",
@@ -36,12 +30,11 @@ export default function Home() {
     "November",
     "December",
   ];
-  const [activeArr, setActiveArr] = useState([]);
   const [activityAr, setActivityAr] = useState([]);
   const [month, setMonth] = useState(0);
   const [lowestDate, setLowestDate] = useState(0);
   const [highestDate, setHighestDate] = useState(0);
-  const [selectedDate, setSelectedDate] = useState(0);
+  const [selectedDates, setSelectedDates] = useState([]);
   const [kmTraveled, setKmTraveled] = useState(0);
   const [placesVisited, setPlacesVisited] = useState(0);
   const [hrSpentTraveling, setHrSpentTravelling] = useState(0);
@@ -51,9 +44,11 @@ export default function Home() {
   const [showActivities, setShowActivities] = useState(true);
   const [showPlaces, setShowPlaces] = useState(true);
   const [avaibleDates, setAvaibleDates] = useState([]);
+  const [alleDage, setAlleDage] = useState(true);
   useEffect(() => {
     loadStorage();
   }, []);
+
   const loadStorage = () => {
     setActivityAr(
       JSON.parse(sessionStorage.getItem("mapData")).timelineObjects
@@ -136,119 +131,153 @@ export default function Home() {
     setAvaibleDates(availDates);
   }, [lowestDate, highestDate]);
 
-  const list = [143, 41, 42, 424, 1241, 41241];
   return (
     <>
       <Head>
         <title>Dashboard</title>
       </Head>
-      <Page>
-        <div>
-          <Text h1>{months[month] + " " + year}</Text>
-          <Grid.Container gap={2}>
-            <Grid>
-              <Description title="Kilometer rejst" content={kmTraveled} />
-            </Grid>
-            <Grid>
-              <Description title="Steder besøgt" content={placesVisited} />
-            </Grid>
-            <Grid>
-              <Description
-                title="Timer rejst"
-                content={parseInt(hrSpentTraveling)}
-              />
-            </Grid>
-            <Grid>
-              <Description title="Dit Hjem" content={home} />
-            </Grid>
-            <Grid>
-              <Description
-                title="Vis Aktiviteter"
-                content={
-                  <Toggle
-                    onChange={(e) => setShowActivities(e.target.checked)}
-                    initialChecked
-                  />
-                }
-              />
-            </Grid>
-            <Grid>
-              <Description
-                title="Vis Steder"
-                content={
-                  <Toggle
-                    initialChecked
-                    onChange={(e) => setShowPlaces(e.target.checked)}
-                  />
-                }
-              />
-            </Grid>
-            {avaibleDates != [] ? (
+      {home ? (
+        <Page margin={0} width="100%" >
+          <div>
+            <Text h1>{months[month] + " " + year}</Text>
+            <Grid.Container gap={2}>
+              <Grid>
+                <Description title="Kilometer rejst" content={kmTraveled} />
+              </Grid>
+              <Grid>
+                <Description title="Steder besøgt" content={placesVisited} />
+              </Grid>
               <Grid>
                 <Description
-                  title="Vælg Dato"
+                  title="Timer rejst"
+                  content={parseInt(hrSpentTraveling)}
+                />
+              </Grid>
+              <Grid>
+                <Description title="Dit Hjem" content={home} />
+              </Grid>
+              <Grid>
+                <Description
+                  title="Vis Aktiviteter"
                   content={
-                    <Select
-                      initialValue="0"
-                      onChange={(e) => setSelectedDate(parseInt(e))}
-                    >
-                      <Select.Option value="0">Alle</Select.Option>
-                      <Divider />
-                      {avaibleDates.map((number, index) => {
-                        return (
-                          <Select.Option
-                            key={index + 1}
-                            value={number.toString()}
-                          >
-                            {number.toString()}
-                          </Select.Option>
-                        );
-                      })}
-                    </Select>
+                    <Toggle
+                      onChange={(e) => setShowActivities(e.target.checked)}
+                      initialChecked
+                    />
                   }
                 />
               </Grid>
-            ) : null}
-          </Grid.Container>
-        </div>
-        <Grid.Container mt={2} wrap="wrap" justify="center" gap={3}>
-          {activityAr != [] &&
-          activityAr != undefined &&
-          (showActivities || showPlaces) ? (
-            activityAr.map((activity, index) => {
-              var dateSelector;
-              if (activity.activitySegment != undefined) {
-                dateSelector = new Date(
-                  parseInt(activity.activitySegment.duration.startTimestampMs)
-                );
-              } else {
-                dateSelector = new Date(
-                  parseInt(activity.placeVisit.duration.startTimestampMs)
-                );
-              }
-              if (
-                dateSelector.getDate() === selectedDate ||
-                selectedDate === 0
-              ) {
-                if (activity.activitySegment != undefined && showActivities) {
-                  var segment = activity.activitySegment;
-                  
-                  return <ActivityCard  activity={segment}/>;
-                } else if (showPlaces && activity.placeVisit != undefined) {
-                  var place = activity.placeVisit;
-                  
-                  return (
-                  
-                   <PlaceCard place={place} />
+              <Grid>
+                <Description
+                  title="Vis Steder"
+                  content={
+                    <Toggle
+                      initialChecked
+                      onChange={(e) => setShowPlaces(e.target.checked)}
+                    />
+                  }
+                />
+              </Grid>
+              <Grid>
+                <Description
+                  title="Vis alle dage"
+                  content={
+                    <Toggle
+                      onChange={(e) => setAlleDage(e.target.checked)}
+                      initialChecked
+                    />
+                  }
+                />
+              </Grid>
+              {avaibleDates != [] ? (
+                <Grid>
+                  <Description
+                    title="Vælg Dato"
+                    content={
+                      <Select
+                      pure
+                      width="200px"
+                        multiple
+                        disabled={alleDage}
+                        onChange={(e) => {
+                          var numArr = [];
+                          if(e.length > 0){
+                            for (var i = 0; i < e.length; i++){
+                              numArr.push(parseInt(e[i]));
+                            }
+                          }
+                          setSelectedDates(numArr)
+                        }}
+                      >
+                        <Divider />
+                        {avaibleDates.map((number, index) => {
+                          return (
+                            <Select.Option
+                              key={index + 1}
+                              value={number.toString()}
+                            >
+                              {number.toString()}
+                            </Select.Option>
+                          );
+                        })}
+                      </Select>
+                    }
+                  />
+                </Grid>
+              ) : null}
+            </Grid.Container>
+          </div>
+          <Grid.Container mt={2} wrap="wrap" justify="center" gap={3}>
+            {activityAr != [] &&
+            activityAr != undefined &&
+            ((showActivities || showPlaces) && (alleDage || selectedDates.length > 0)) ? (
+              activityAr.map((activity, index) => {
+                var dateSelector;
+                if (activity.activitySegment != undefined) {
+                  dateSelector = new Date(
+                    parseInt(activity.activitySegment.duration.startTimestampMs)
+                  );
+                } else {
+                  dateSelector = new Date(
+                    parseInt(activity.placeVisit.duration.startTimestampMs)
                   );
                 }
-              }
-            })
-          ) : (
-            <Text h3>Slå et filter fra for at vise nogle aktiviteter.</Text>
-          )}
-        </Grid.Container>
-      </Page>
+                if(selectedDates.length > 0 && !alleDage){
+                  for (let l = 0; l < selectedDates.length; l++) {
+                    if (dateSelector.getDate() === selectedDates[l]) {
+                      if (activity.activitySegment != undefined && showActivities) {
+                        var segment = activity.activitySegment;
+    
+                        return <ActivityCard key={index} activity={segment} />;
+                      } else if (showPlaces && activity.placeVisit != undefined) {
+                        var place = activity.placeVisit;
+    
+                        return <PlaceCard key={index} place={place} />;
+                      }
+                    }
+                  }
+                }
+                else if(alleDage){
+                  if (activity.activitySegment != undefined && showActivities) {
+                    var segment = activity.activitySegment;
+
+                    return <ActivityCard key={index} activity={segment} />;
+                  } else if (showPlaces && activity.placeVisit != undefined) {
+                    var place = activity.placeVisit;
+
+                    return <PlaceCard key={index} place={place} />;
+                  }
+                }
+                
+              })
+            ) : (
+              <Text h3>Slå et filter fra for at vise nogle aktiviteter.</Text>
+            )}
+          </Grid.Container>
+        </Page>
+      ) : (
+        <Loading />
+      )}
     </>
   );
 }

@@ -2,7 +2,7 @@ import '../styles/globals.css'
 import {GeistProvider, CssBaseline} from '@geist-ui/react'
 function MyApp({ Component, pageProps }) {
   return(
-    <GeistProvider>
+    <GeistProvider themeType="light">
       <CssBaseline>
       <Component {...pageProps} />
       </CssBaseline>
