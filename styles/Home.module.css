@@ -5,3 +5,10 @@
     justify-content: center;
     height: 100vh;
 }
+
+.fixed{
+    top: 20px;
+    left: 20px;
+    z-index: 999;
+    position: absolute;
+}
