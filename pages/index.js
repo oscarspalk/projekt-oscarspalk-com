@@ -1,64 +1,93 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
-import { Text, Image, Modal, Button, Link, Tree, Select } from "@geist-ui/react";
+import {
+  Text,
+  Image,
+  Modal,
+  Button,
+  Link,
+  Tree,
+  Select,
+} from "@geist-ui/react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 export default function Home() {
   const router = useRouter();
   const [visible, setVisible] = useState(false);
   useEffect(() => {
-    if(!sessionStorage.getItem('mapData')){
+    if (!sessionStorage.getItem("mapData")) {
       sessionStorage.setItem("mapData", "INVALID");
     }
-    
   }, []);
 
   const handleUpload = (event) => {
     const reader = new FileReader();
-    reader.addEventListener('load',() => readFile(reader.result), false);
+    reader.addEventListener("load", () => readFile(reader.result), false);
     if (event.files[0]) {
       reader.readAsText(event.files[0]);
     }
   };
 
   const readFile = async (result) => {
-   
-    await sessionStorage.setItem('mapData', result);
-    router.push('/submitted')
-  }
+    await sessionStorage.setItem("mapData", result);
+    router.push("/submitted");
+  };
   const closeHandler = () => {
-    setVisible(false)
-  }
+    setVisible(false);
+  };
 
   const fetchExample = async () => {
-    const data  =await fetch(`https://projekt.oscarspalk.com/example.json`)
+    const data = await fetch(`https://projekt.oscarspalk.com/example.json`);
     const stringy = await data.text();
-    await sessionStorage.setItem('mapData', stringy);
-    router.push('/submitted')
-  }
-  
+    await sessionStorage.setItem("mapData", stringy);
+    router.push("/submitted");
+  };
+
   return (
     <div className={styles.container}>
       <Modal visible={visible} onClose={closeHandler}>
         <Modal.Title>Guide</Modal.Title>
-        
+
         <Modal.Content>
-          <p>Start med at gå til: <Link icon color href="https://takeout.google.com" target="_blank">Takeout</Link></p>
-          <p>Fravælg alle produkter, scroll ned indtil du finder lokationshistorik, derefter vælger du den. Scroll helt ned i bunden og tryk næste trin.</p>
-          <p>Vælg, hvad der passer dig, da det ikke kommer til at ændre på det data, du får.</p>
+          <p>
+            Start med at gå til:{" "}
+            <Link icon color href="https://takeout.google.com" target="_blank">
+              Takeout
+            </Link>
+          </p>
+          <p>
+            Fravælg alle produkter, scroll ned indtil du finder
+            lokationshistorik, derefter vælger du den. Scroll helt ned i bunden
+            og tryk næste trin.
+          </p>
+          <p>
+            Vælg, hvad der passer dig, da det ikke kommer til at ændre på det
+            data, du får.
+          </p>
           <p>Tryk Opret Eksport</p>
-          <p>Vent 5 minutter, derefter gå til <Link icon color href="https://gmail.com" target="_blank">Gmail</Link> Her kan du downloade din ZIP-fil. </p>
-          <p>Nedenfor er et fil-træ, hvor man kan se, hvordan folder strukturen burde være. Hvis du planlægger at bruge værktøjet, så skal du tage en månedsfil, i dette eksempel 2021_SEPTEMBER.json, og smide ind eller vælge.</p>
+          <p>
+            Vent 5 minutter, derefter gå til{" "}
+            <Link icon color href="https://gmail.com" target="_blank">
+              Gmail
+            </Link>{" "}
+            Her kan du downloade din ZIP-fil.{" "}
+          </p>
+          <p>
+            Nedenfor er et fil-træ, hvor man kan se, hvordan folder strukturen
+            burde være. Hvis du planlægger at bruge værktøjet, så skal du tage
+            en månedsfil, i dette eksempel 2021_SEPTEMBER.json, og smide ind
+            eller vælge.
+          </p>
           <Tree initialExpand>
             <Tree.Folder name="takeout-xxxxxxx">
               <Tree.Folder name="Takeout">
                 <Tree.Folder name="Lokationshistorik">
                   <Tree.Folder name="Semantic Location History">
-                  <Tree.Folder name="20XX"></Tree.Folder>
-                  <Tree.Folder name="20XX"></Tree.Folder>
-                  <Tree.Folder name="20XX"></Tree.Folder>
+                    <Tree.Folder name="20XX"></Tree.Folder>
+                    <Tree.Folder name="20XX"></Tree.Folder>
+                    <Tree.Folder name="20XX"></Tree.Folder>
                     <Tree.Folder name="2021">
-                     <Tree.File name="2021_SEPTEMBER.json"></Tree.File>
+                      <Tree.File name="2021_SEPTEMBER.json"></Tree.File>
                     </Tree.Folder>
                   </Tree.Folder>
                 </Tree.Folder>
@@ -67,7 +96,9 @@ export default function Home() {
             </Tree.Folder>
           </Tree>
         </Modal.Content>
-        <Modal.Action passive onClick={() => setVisible(false)}>Close</Modal.Action>
+        <Modal.Action passive onClick={() => setVisible(false)}>
+          Close
+        </Modal.Action>
       </Modal>
       <Head>
         <title>Projekt</title>
@@ -75,14 +106,24 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Image.Browser url="https://projekt.oscarspalk.com" invert>
-        <Image  width="480px" height="246px" src="https://projekt.oscarspalk.com/projektopgave.png" alt="Screenshot" />
+        <Image
+          width="480px"
+          height="246px"
+          src="https://projekt.oscarspalk.com/projektopgave.png"
+          alt="Screenshot"
+        />
       </Image.Browser>
-      <Text mt={1} h3>Upload din lokationsfil nedenfor eller brug eksempelfilen</Text>
-      <Button onClick={fetchExample} type="secondary">Eksempelfil</Button>
-      <Button mt={1} onClick={() => setVisible(true)}>Guide</Button>
+      <Text mt={1} h3>
+        Upload din lokationsfil nedenfor eller brug eksempelfilen
+      </Text>
+      <Button onClick={fetchExample} type="secondary">
+        Eksempelfil
+      </Button>
+      <Button mt={1} onClick={() => setVisible(true)}>
+        Guide
+      </Button>
       <br />
       <input onChange={(e) => handleUpload(e.target)} type="file" />
-      
     </div>
   );
 }

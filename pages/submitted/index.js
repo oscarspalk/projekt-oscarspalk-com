@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import Head from "next/head";
-import Image from "next/image";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import {
   Text,
   Grid,
@@ -10,8 +10,10 @@ import {
   Toggle,
   Loading,
   Divider,
+  Collapse,
+  Pagination,
 } from "@geist-ui/react";
-import MapPin from "@geist-ui/react-icons/mapPin";
+import { Polyline } from "react-leaflet";
 import { useEffect, useCallback, useState } from "react";
 import ActivityCard from "../../components/ActivityCard";
 import PlaceCard from "../../components/PlaceCard";
@@ -45,6 +47,11 @@ export default function Home() {
   const [showPlaces, setShowPlaces] = useState(true);
   const [avaibleDates, setAvaibleDates] = useState([]);
   const [alleDage, setAlleDage] = useState(true);
+  const [markers, setMarkers] = useState([]);
+  const [activities, setActivities] = useState([]);
+  const [renderedObjects, setRenderedObjects] = useState([]);
+  const [rObjectsLength, setRObjectsLength] = useState(0);
+  const [selectedPage, setSelectedPage] = useState(0);
   useEffect(() => {
     loadStorage();
   }, []);
@@ -131,15 +138,151 @@ export default function Home() {
     setAvaibleDates(availDates);
   }, [lowestDate, highestDate]);
 
+  useEffect(() => {
+    var marks = [];
+    var activitiesTemp = [];
+
+    setRenderedObjects(
+      activityAr != [] &&
+        activityAr != undefined &&
+        (showActivities || showPlaces) &&
+        (alleDage || selectedDates.length > 0) ? (
+        activityAr.map((activity, index) => {
+          var dateSelector;
+          if (activity.activitySegment != undefined) {
+            dateSelector = new Date(
+              parseInt(activity.activitySegment.duration.startTimestampMs)
+            );
+          } else {
+            dateSelector = new Date(
+              parseInt(activity.placeVisit.duration.startTimestampMs)
+            );
+          }
+          if (selectedDates.length > 0 && !alleDage) {
+            for (let l = 0; l < selectedDates.length; l++) {
+              if (dateSelector.getDate() === selectedDates[l]) {
+                if (activity.activitySegment != undefined && showActivities) {
+                  var segment = activity.activitySegment;
+                  var startlocation = [
+                    segment.startLocation.latitudeE7 / 10000000,
+                    segment.startLocation.longitudeE7 / 10000000,
+                  ];
+                  var endlocation = [
+                    segment.endLocation.latitudeE7 / 10000000,
+                    segment.endLocation.longitudeE7 / 10000000,
+                  ];
+
+                  var waypointsArray =
+                    segment.waypointPath &&
+                    segment.waypointPath.waypoints.map((waypoint) => {
+                      var lat = waypoint.latE7 / 10000000;
+                      var long = waypoint.lngE7 / 10000000;
+
+                      return [lat, long];
+                    });
+
+                  var path =
+                    waypointsArray != undefined
+                      ? [startlocation]
+                          .concat(waypointsArray)
+                          .concat([endlocation])
+                      : [startlocation, endlocation];
+
+                  const lineOptions = { color: "red" };
+                  var activityPart = (
+                    <Polyline
+                      key={index}
+                      pathOptions={lineOptions}
+                      positions={path}
+                    />
+                  );
+                  activitiesTemp.push(activityPart);
+                  return <ActivityCard key={index} activity={segment} />;
+                } else if (showPlaces && activity.placeVisit != undefined) {
+                  var place = activity.placeVisit;
+                  var lat = place.location.latitudeE7 / 10000000;
+                  var long = place.location.longitudeE7 / 10000000;
+                  var mark = {
+                    latitude: lat,
+                    longitude: long,
+                    name: place.location.name,
+                  };
+                  marks.push(mark);
+                  return <PlaceCard key={index} place={place} />;
+                }
+              }
+            }
+          } else if (alleDage) {
+            if (activity.activitySegment != undefined && showActivities) {
+              var segment = activity.activitySegment;
+              var startlocation = [
+                segment.startLocation.latitudeE7 / 10000000,
+                segment.startLocation.longitudeE7 / 10000000,
+              ];
+              var endlocation = [
+                segment.endLocation.latitudeE7 / 10000000,
+                segment.endLocation.longitudeE7 / 10000000,
+              ];
+
+              var waypointsArray =
+                segment.waypointPath &&
+                segment.waypointPath.waypoints.map((waypoint) => {
+                  var lat = waypoint.latE7 / 10000000;
+                  var long = waypoint.lngE7 / 10000000;
+
+                  return [lat, long];
+                });
+
+              var path =
+                waypointsArray != undefined
+                  ? [startlocation].concat(waypointsArray).concat([endlocation])
+                  : [startlocation, endlocation];
+
+              const lineOptions = { color: "red" };
+              var activityPart = (
+                <Polyline
+                  key={index}
+                  pathOptions={lineOptions}
+                  positions={path}
+                />
+              );
+              activitiesTemp.push(activityPart);
+              return <ActivityCard key={index} activity={segment} />;
+            } else if (showPlaces && activity.placeVisit != undefined) {
+              var place = activity.placeVisit;
+              var lat = place.location.latitudeE7 / 10000000;
+              var long = place.location.longitudeE7 / 10000000;
+              var mark = {
+                latitude: lat,
+                longitude: long,
+                name: place.location.name,
+              };
+              marks.push(mark);
+              return <PlaceCard key={index} place={place} />;
+            }
+          }
+        })
+      ) : (
+        <Text h3>Slå et filter fra for at vise nogle aktiviteter.</Text>
+      )
+    );
+    setMarkers(marks);
+    setActivities(activitiesTemp);
+  }, [activityAr, selectedDates, alleDage, showActivities, showPlaces]);
+  const average = (array) => {
+    return array != [] ? array.reduce((a, b) => a + b, 0) / array.length : 0, 0;
+  };
+
   return (
     <>
       <Head>
         <title>Dashboard</title>
       </Head>
       {home ? (
-        <Page margin={0} width="100%" >
+        <Page margin={0} width="100%">
           <div>
             <Text h1>{months[month] + " " + year}</Text>
+
             <Grid.Container gap={2}>
               <Grid>
                 <Description title="Kilometer rejst" content={kmTraveled} />
@@ -195,18 +338,18 @@ export default function Home() {
                     title="Vælg Dato"
                     content={
                       <Select
-                      pure
-                      width="200px"
+                        pure
+                        width="200px"
                         multiple
                         disabled={alleDage}
                         onChange={(e) => {
                           var numArr = [];
-                          if(e.length > 0){
-                            for (var i = 0; i < e.length; i++){
+                          if (e.length > 0) {
+                            for (var i = 0; i < e.length; i++) {
                               numArr.push(parseInt(e[i]));
                             }
                           }
-                          setSelectedDates(numArr)
+                          setSelectedDates(numArr);
                         }}
                       >
                         <Divider />
@@ -227,52 +370,36 @@ export default function Home() {
               ) : null}
             </Grid.Container>
           </div>
+          <Collapse
+            mt={2}
+            shadow
+            title="Kort"
+            subtitle="Se din lokationshistorik på et kort."
+          >
+            <div style={{ height: "500px", display: "flex" }}>
+              <MapContainer
+                style={{ flexGrow: 1, borderRadius: "5px" }}
+                center={[55.769428, 10.671679]}
+                zoom={6}
+                scrollWheelZoom={false}
+              >
+                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                {markers != []
+                  ? markers.map((mark, index) => (
+                      <Marker
+                        key={index}
+                        position={[mark.latitude, mark.longitude]}
+                      >
+                        <Popup>{mark.name}</Popup>
+                      </Marker>
+                    ))
+                  : null}
+                {activities}
+              </MapContainer>
+            </div>
+          </Collapse>
           <Grid.Container mt={2} wrap="wrap" justify="center" gap={3}>
-            {activityAr != [] &&
-            activityAr != undefined &&
-            ((showActivities || showPlaces) && (alleDage || selectedDates.length > 0)) ? (
-              activityAr.map((activity, index) => {
-                var dateSelector;
-                if (activity.activitySegment != undefined) {
-                  dateSelector = new Date(
-                    parseInt(activity.activitySegment.duration.startTimestampMs)
-                  );
-                } else {
-                  dateSelector = new Date(
-                    parseInt(activity.placeVisit.duration.startTimestampMs)
-                  );
-                }
-                if(selectedDates.length > 0 && !alleDage){
-                  for (let l = 0; l < selectedDates.length; l++) {
-                    if (dateSelector.getDate() === selectedDates[l]) {
-                      if (activity.activitySegment != undefined && showActivities) {
-                        var segment = activity.activitySegment;
-    
-                        return <ActivityCard key={index} activity={segment} />;
-                      } else if (showPlaces && activity.placeVisit != undefined) {
-                        var place = activity.placeVisit;
-    
-                        return <PlaceCard key={index} place={place} />;
-                      }
-                    }
-                  }
-                }
-                else if(alleDage){
-                  if (activity.activitySegment != undefined && showActivities) {
-                    var segment = activity.activitySegment;
-
-                    return <ActivityCard key={index} activity={segment} />;
-                  } else if (showPlaces && activity.placeVisit != undefined) {
-                    var place = activity.placeVisit;
-
-                    return <PlaceCard key={index} place={place} />;
-                  }
-                }
-                
-              })
-            ) : (
-              <Text h3>Slå et filter fra for at vise nogle aktiviteter.</Text>
-            )}
+            {renderedObjects}
           </Grid.Container>
         </Page>
       ) : (
