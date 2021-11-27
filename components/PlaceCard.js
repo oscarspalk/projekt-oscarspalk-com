@@ -1,6 +1,23 @@
 import { Button, Card, Description, Grid, Modal } from "@geist-ui/react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { useState } from "react";
+import dynamic from 'next/dynamic';
+
+const MapContainer = dynamic(() =>
+  import('react-leaflet').then((leaftlet) => leaftlet.MapContainer)
+)
+
+const Marker = dynamic(() =>
+  import('react-leaflet').then((leaftlet) => leaftlet.Marker)
+)
+
+
+const TileLayer = dynamic(() =>
+  import('react-leaflet').then((leaftlet) => leaftlet.TileLayer)
+)
+
+const Popup = dynamic(() =>
+  import('react-leaflet').then((leaftlet) => leaftlet.Popup)
+)
 import MapPin from "@geist-ui/react-icons/mapPin";
 
 const PlaceCard = (props) => {

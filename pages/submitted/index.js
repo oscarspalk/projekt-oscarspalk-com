@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import Head from "next/head";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import {
   Text,
   Grid,
@@ -11,12 +10,36 @@ import {
   Loading,
   Divider,
   Collapse,
-  Pagination,
 } from "@geist-ui/react";
-import { Polyline } from "react-leaflet";
-import { useEffect, useCallback, useState } from "react";
-import ActivityCard from "../../components/ActivityCard";
+import { useEffect, useState } from "react";
+
 import PlaceCard from "../../components/PlaceCard";
+import dynamic from "next/dynamic";
+
+const MapContainer = dynamic(() =>
+  import("react-leaflet").then((leaftlet) => leaftlet.MapContainer)
+);
+
+const ActivityCard = dynamic(() =>
+  import('../../components/ActivityCard')
+)
+
+const Polyline = dynamic(() =>
+  import("react-leaflet").then((leaftlet) => leaftlet.Polyline)
+);
+
+const Marker = dynamic(() =>
+  import("react-leaflet").then((leaftlet) => leaftlet.Marker)
+);
+
+const TileLayer = dynamic(() =>
+  import("react-leaflet").then((leaftlet) => leaftlet.TileLayer)
+);
+
+const Popup = dynamic(() =>
+  import("react-leaflet").then((leaftlet) => leaftlet.Popup)
+);
+
 export default function Home() {
   const months = [
     "Januar",
