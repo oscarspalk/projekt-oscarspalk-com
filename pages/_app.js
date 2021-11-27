@@ -5,8 +5,9 @@ import styles from "../styles/Home.module.css";
 import { Moon, Sun, Home  } from "@geist-ui/react-icons";
 import Head from "next/head";
 import {useRouter} from 'next/router'
+import dynamic from "next/dynamic";
 
-function MyApp({ Component, pageProps }) {
+function App({ Component, pageProps }) {
   const [themeType, setThemeType] = useState(false);
   const router = useRouter();
   return (
@@ -42,4 +43,6 @@ function MyApp({ Component, pageProps }) {
   );
 }
 
-export default MyApp;
+export default dynamic(() => Promise.resolve(App), {
+  ssr: false,
+});
